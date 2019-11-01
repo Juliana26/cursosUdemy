@@ -28,17 +28,17 @@ functions:
     handler:
       code: src/email-password/signup.ts
 
-#   authenticate:
-#     type: resolver
-#     schema: src/email-password/authenticate.graphql
-#     handler:
-#       code: src/email-password/authenticate.ts
-#
-#   loggedInUser:
-#     type: resolver
-#     schema: src/email-password/loggedInUser.graphql
-#     handler:
-#       code: src/email-password/loggedInUser.ts
+  authenticate:
+    type: resolver
+    schema: src/email-password/authenticate.graphql
+    handler:
+      code: src/email-password/authenticate.ts
+
+  loggedInUser:
+    type: resolver
+    schema: src/email-password/loggedInUser.graphql
+    handler:
+      code: src/email-password/loggedInUser.ts
 
 # Model/Relation permissions are used to limit the API access
 # To take the burden of thinking about those while development, we
@@ -46,8 +46,18 @@ functions:
 # Read more here:
 # https://www.graph.cool/docs/reference/auth/authorization/overview-iegoo0heez
 permissions:
-  - operation: "*"
 
+  - operation: User.read
+    fields: [id, password]
+  - operation: User.create
+    fields: [name, email, password]
+
+  - operation: User.read
+    authenticated: true
+  - operation: User.update
+    authenticated: true
+  - operation: User.delete
+    authenticated: true
 
 # Your root tokens used for functions to get full access to the API
 # Read more here:

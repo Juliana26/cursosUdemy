@@ -1,0 +1,21 @@
+<div class="login-container">
+  <mat-card>
+    <mat-card-title>
+      <mat-toolbar color="primary">Sign In</mat-toolbar>
+    </mat-card-title>
+
+    <mat-card-content>
+      <form (submit)="onSubmit()" [formGroup]="loginForm">
+        <mat-form-field>
+          <input matInput type="email" placeholder="Email" formControlName="email">
+        </mat-form-field>
+
+        <mat-form-field>
+          <input matInput type="password" placeholder="Password" formControlName="password">
+        </mat-form-field>
+
+        <button mat-button type="submit" color="primary">Sign In</button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,13 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { MatSnackBar } from '@angular/material';
 import { takeWhile } from 'rxjs/operators';
 
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ErrorService } from 'src/app/core/services/error.service';
 
 @Component({
-  selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -17,19 +17,24 @@ export class LoginComponent implements OnInit, OnDestroy {
   configs = {
       isLogin: true,
       actionText: 'SignIn',
-      buttonActionText: 'Create account'
+      buttonActionText: 'Create account',
+      isLoading: false
   };
   private nameControl = new FormControl('', [Validators.required, Validators.minLength(5)]);
   private alive = true;
 
+  @HostBinding('class.app-login-spinner') private applySpinnerClass = true;
+
   constructor(
     private authService: AuthService,
     private errorService: ErrorService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
     this.createForm();
+    this.applySpinnerClass = true;
   }
 
   createForm(): void {
@@ -42,6 +47,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     console.log(this.loginForm.value);
 
+    this.configs.isLoading = true;
+
     const operation: Observable<{id: string, token: string}> =
       (this.configs.isLogin)
         ? this.authService.singinUser(this.loginForm.value)
@@ -52,19 +59,22 @@ export class LoginComponent implements OnInit, OnDestroy {
         takeWhile(() => this.alive)
       )
       .subscribe(
-        (res: any) =>{
+        (res: any) => {
           console.log('Redirecting ...', res);
+          this.configs.isLoading = false;
         },
         err => {
-          console.log(this.errorService.getErrorMessage(err));
+          console.log(err);
+          this.configs.isLoading = false;
+          this.snackBar.open(this.errorService.getErrorMessage(err), 'Done', {duration: 5000, verticalPosition: 'top'});
         },
-        () => console.log('Observable completed!'))
+        () => console.log('Observable completed!'));
   }
 
   changeAction(): void {
     this.configs.isLogin = !this.configs.isLogin;
-    this.configs.actionText = !this.configs.isLogin ? "SignUp" : "SignIn";
-    this.configs.buttonActionText = !this.configs.isLogin ? "Already have account" : "Create acco";
+    this.configs.actionText = !this.configs.isLogin ? 'SignUp' : 'SignIn';
+    this.configs.buttonActionText = !this.configs.isLogin ? 'Already have account' : 'Create account';
     !this.configs.isLogin ? this.loginForm.addControl('name', this.nameControl) : this.loginForm.removeControl('name');
   }
 

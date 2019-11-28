@@ -4,18 +4,26 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
 
 import { AUTHENTICATE_USER_MUTATION, SIGNUP_USER_MUTATION } from './auth.graphql';
+import { StorageKeys } from 'src/app/storage-keys';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
+  redirectUrl: string;
+  keepSigned: boolean;
   private authenticated = new ReplaySubject<boolean>(1);
 
   constructor(
     private apollo: Apollo
   ) {
     this.isAuthenticated.subscribe(is => console.log('AuthState', is));
+    this.init();
+  }
+
+  init(): void {
+    this.keepSigned = JSON.parse(window.localStorage.getItem(StorageKeys.KEEP_SIGNED));
   }
 
   get isAuthenticated(): Observable<boolean> {
@@ -28,9 +36,9 @@ export class AuthService {
       variables
     }).pipe(
       map((res: any) => res.data.authenticateUser),
-      tap((res: any) => this.setAuthState(res !== null)),
+      tap((res: any) => this.setAuthState({token: res && res.token, isAuthenticated: res !== null})),
       catchError((error: any) => {
-        this.setAuthState(false);
+        this.setAuthState({token: null, isAuthenticated: false});
         return throwError(error);
       })
     );
@@ -42,15 +50,23 @@ export class AuthService {
       variables
     }).pipe(
       map((res: any) => res.data.signupUser),
-      tap((res: any) => this.setAuthState(res !== null)),
+      tap((res: any) => this.setAuthState({token: res && res.token, isAuthenticated: res !== null})),
       catchError(error => {
-        this.setAuthState(false);
+        this.setAuthState({token: null, isAuthenticated: false});
         return throwError(error);
       })
     );
   }
 
-  private setAuthState(isAuthenticated: boolean): void {
-    this.authenticated.next(isAuthenticated);
+  toogleKeepSigned(): void {
+    this.keepSigned = !this.keepSigned;
+    window.localStorage.setItem(StorageKeys.KEEP_SIGNED, JSON.stringify(this.keepSigned));
+  }
+
+  private setAuthState(authData: {token: string, isAuthenticated: boolean}): void {
+    if (authData.isAuthenticated) {
+      window.localStorage.setItem(StorageKeys.AUTH_TOKEN, authData.token);
+    }
+    this.authenticated.next(authData.isAuthenticated);
   }
 }

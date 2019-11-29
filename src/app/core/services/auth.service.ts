@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Observable, ReplaySubject, of, throwError, merge } from 'rxjs';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { Apollo } from 'apollo-angular';
 
-import { AUTHENTICATE_USER_MUTATION, SIGNUP_USER_MUTATION } from './auth.graphql';
+import { AUTHENTICATE_USER_MUTATION, SIGNUP_USER_MUTATION, LoggedInUserQuery, LOGGED_IN_USER_QUERY } from './auth.graphql';
 import { StorageKeys } from 'src/app/storage-keys';
 
 @Injectable({
@@ -16,7 +17,8 @@ export class AuthService {
   private authenticated = new ReplaySubject<boolean>(1);
 
   constructor(
-    private apollo: Apollo
+    private apollo: Apollo,
+    private router: Router
   ) {
     this.isAuthenticated.subscribe(is => console.log('AuthState', is));
     this.init();
@@ -61,6 +63,50 @@ export class AuthService {
   toogleKeepSigned(): void {
     this.keepSigned = !this.keepSigned;
     window.localStorage.setItem(StorageKeys.KEEP_SIGNED, JSON.stringify(this.keepSigned));
+  }
+
+  logout(): void {
+    window.localStorage.removeItem(StorageKeys.AUTH_TOKEN);
+    window.localStorage.removeItem(StorageKeys.KEEP_SIGNED);
+    this.keepSigned = false;
+    this.authenticated.next(false);
+    this.router.navigate(['/login']);
+    this.apollo.getClient().resetStore();
+  }
+
+  autoLogin(): Observable<any> {
+    if (!this.keepSigned) {
+      this.authenticated.next(false);
+      window.localStorage.removeItem(StorageKeys.AUTH_TOKEN);
+      return of();
+    }
+
+    return this.validateToken()
+      .pipe(
+        tap(authData => {
+          const token = window.localStorage.getItem(StorageKeys.AUTH_TOKEN);
+          this.setAuthState({token, isAuthenticated: authData.isAuthenticated});
+        }),
+        mergeMap(() => of()),
+        catchError(error => {
+          this.setAuthState({token: null, isAuthenticated: false});
+          return throwError(error);
+        })
+      );
+  }
+
+  private validateToken(): Observable<{id: string, isAuthenticated: boolean}> {
+    return this.apollo.query<LoggedInUserQuery>({
+      query: LOGGED_IN_USER_QUERY
+    }).pipe(
+      map((res: any) => {
+        const user = res.data.loggedInUser;
+        return {
+          id: user && user.id,
+          isAuthenticated: user !== null
+        };
+      })
+    );
   }
 
   private setAuthState(authData: {token: string, isAuthenticated: boolean}): void {

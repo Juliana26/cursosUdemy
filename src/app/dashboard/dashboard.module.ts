@@ -6,7 +6,7 @@ import { DashboardHomeComponent } from './components/dashboard-home/dashboard-ho
 
 
 @NgModule({
-  declarations: [DashboardHomeComponent],
+  declarations: [ DashboardHomeComponent ],
   imports: [
     SharedModule,
     DashboardRoutingModule

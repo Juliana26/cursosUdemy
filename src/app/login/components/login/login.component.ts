@@ -2,6 +2,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material';
+import { Router } from '@angular/router';
 import { takeWhile } from 'rxjs/operators';
 
 import { AuthService } from 'src/app/core/services/auth.service';
@@ -29,6 +30,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private errorService: ErrorService,
     private formBuilder: FormBuilder,
+    private router: Router,
     private snackBar: MatSnackBar
   ) { }
 
@@ -65,10 +67,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         (res: any) => {
-          console.log('Redirecting ...', res);
           this.authService.setRememberMe(this.loginForm.value);
           const redirect: string = this.authService.redirectUrl || '/dashboard';
-          // redirect with router
+          console.log('Redirecting ...', redirect);
+          this.router.navigate([redirect]);
           this.authService.redirectUrl = null;
           this.configs.isLoading = false;
         },

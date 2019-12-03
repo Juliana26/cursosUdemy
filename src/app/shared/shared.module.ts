@@ -5,11 +5,14 @@ import {
   MatButtonModule,
   MatCardModule,
   MatFormFieldModule,
+  MatIconModule,
   MatInputModule,
+  MatLineModule,
+  MatListModule,
   MatProgressSpinnerModule,
   MatSnackBarModule,
   MatSlideToggleModule,
-  MatToolbarModule,
+  MatToolbarModule
 } from '@angular/material';
 
 @NgModule({
@@ -18,7 +21,10 @@ import {
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
+    MatLineModule,
+    MatListModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatSlideToggleModule,

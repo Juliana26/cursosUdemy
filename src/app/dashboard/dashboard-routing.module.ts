@@ -6,11 +6,17 @@ import { DashboardHomeComponent } from './components/dashboard-home/dashboard-ho
 import { DashboardResourcesComponent } from './components/dashboard-resources/dashboard-resources.component';
 
 const routes: Routes = [
-  { path: '',
+  {
+    path: '',
     component: DashboardHomeComponent,
     canActivate: [ AuthGuard ],
     canActivateChild: [ AuthGuard ],
     children: [
+      {
+        path: 'chat',
+        loadChildren: './../chat/chat.module#ChatModule',
+        canLoad: [ AuthGuard ]
+      },
       {path: '', component: DashboardResourcesComponent}
     ]
   }

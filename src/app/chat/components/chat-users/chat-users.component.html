@@ -3,7 +3,7 @@
   <a mat-list-item routerLink="./" *ngFor="let user of users$ | async">
     <img matListAvatar src="assets/images/user-no-photo.png" title="user.name">ne
     <h3 matLine>{{ user.name }}</h3>
-    <p matLine>{{ user.createdAt }}</p>
+    <p matLine>Member since: {{ user.createdAt | date: "dd/MM/yyyy" }}</p>
   </a>
 
 </mat-nav-list>

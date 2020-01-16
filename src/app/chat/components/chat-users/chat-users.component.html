@@ -1,1 +1,9 @@
-<p>Users list</p>
+<mat-list>
+
+  <a mat-list-item routerLink="./" *ngFor="let user of users$ | async">
+    <img matListAvatar src="assets/images/user-no-photo.png" title="user.name">ne
+    <h3 matLine>{{ user.name }}</h3>
+    <p matLine>{{ user.email }}</p>
+  </a>
+
+</mat-list>

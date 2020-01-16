@@ -1,4 +1,4 @@
-import { defalt as Graphcool fromEvent, FunctionEvent } from 'graphcool-lib';
+import { default as Graphcool, fromEvent, FunctionEvent } from 'graphcool-lib';
 import { GraphQLClient } from 'graphql-request';
 import * as bcrypt from 'bcryptjs';
 
